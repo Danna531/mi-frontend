@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Mis tareas</title>
+  <style>
+    body { font-family: sans-serif; max-width: 480px; margin: 40px auto; padding: 0 16px; }
+    form { display: flex; gap: 8px; }
+    input { flex: 1; padding: 8px; }
+    button { padding: 8px 12px; cursor: pointer; }
+    li { display: flex; justify-content: space-between; margin: 8px 0; }
+  </style>
+</head>
+<body>
+  <h1>Mis tareas</h1>
+  <form id="form">
+    <input id="titulo" placeholder="Nueva tarea" required>
+    <button>Agregar</button>
+  </form>
+  <ul id="lista"></ul>
+
+  <script>
+    // CAMBIA ESTO por la URL de tu API en Render
+    const API_URL = 'https://mi-api-uqbe.onrender.com';
+
+    async function cargar() {
+      const res = await fetch(API_URL + '/tareas');
+      const tareas = await res.json();
+      document.getElementById('lista').innerHTML = tareas
+        .map(t => `<li>${t.titulo} <button onclick="borrar(${t.id})">X</button></li>`)
+        .join('');
+    }
+
+    async function borrar(id) {
+      await fetch(API_URL + '/tareas/' + id, { method: 'DELETE' });
+      cargar();
+    }
+
+    document.getElementById('form').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const input = document.getElementById('titulo');
+      await fetch(API_URL + '/tareas', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ titulo: input.value })
+      });
+      input.value = '';
+      cargar();
+    });
+
+    cargar();
+  </script>
+</body>
+</html>
